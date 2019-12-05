@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { StyleSheet, SafeAreaView, ImageBackground, Text, View, Image, PanResponder } from 'react-native';
+import { StyleSheet, SafeAreaView, ImageBackground, Text, View, Image, PanResponder,Dimensions } from 'react-native';
 import LeaveButton from './LeaveButton'
+
+import SensorBluetooth from './SensorBluetooth';
 
 export default class TouchMode extends Component {
   constructor(){
@@ -27,9 +29,10 @@ export default class TouchMode extends Component {
       // The most recent move distance is gestureState.move{X,Y}
       // The accumulated gesture distance since becoming responder is
       // gestureState.d{x,y}
+      console.log(Dimensions.get('window').width, Dimensions.get('window').height)
       this.setState({
-        left: gestureState.dx,
-        top: gestureState.dy,
+        left: Math.max(0, Math.min(180, (((gestureState.dx/2) / Dimensions.get('window').width) + 0.5 ) * 180)) ,
+        top: Math.max(0,Math.min(180, (((gestureState.dy/2) / Dimensions.get('window').height) + 0.5) * 180)),
       });
     },
     onPanResponderTerminationRequest: (evt, gestureState) => true,
@@ -52,6 +55,7 @@ export default class TouchMode extends Component {
     return (
       <SafeAreaView style={touch.container}>
         <ImageBackground source={require('../assets/background.jpg')} style={touch.background}>
+          <SensorBluetooth style={touch.ble} value={this.state}/>
           <View style={touch.infos}>
             <View style={touch.timer}>
               <Text style={touch.timerValue}>
@@ -150,5 +154,11 @@ const touch = StyleSheet.create({
     right: 0,
     alignItems: 'center',
   },
+
+  ble: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  }
 
 });

@@ -7,12 +7,16 @@ import {
     Text,
     StatusBar,
     Button,
-    Alert
+	Alert,
+	Platform,
+	TextInput
 } from 'react-native';
 
 
 
 import { BleManager } from 'react-native-ble-plx';
+
+import base64 from 'react-native-base64';
 
 
 
@@ -21,10 +25,12 @@ class SensorBluetooth extends Component {
 	constructor(){
 		super();
 		this.manager = new BleManager()
+
 		this.state = { 
 			deviceConnected : null,
 			connected : false,
-			deviceId : 0 
+			deviceId : 0,
+			value: ''
 		}
 	}
 
@@ -41,12 +47,21 @@ class SensorBluetooth extends Component {
 	// 	}, true);
 	// }
 	
+	/*componentDidMount() {
+		if (Platform.OS === 'ios') {
+			this.manager.onStateChange((state) => {
+			if (state === 'PoweredOn') this.scanAndConnect()
+			})
+		} else {
+			this.scanAndConnect()
+		}
+	}*/
 
 	scanAndConnect() {
 		this.manager.startDeviceScan(null, null, (error, device) => {
 			if (error) {
 				// Handle error (scanning will be stopped automatically)
-				alert("Error : ", error)
+				console.log(error)
 				return
 			}
 			// Check if it is a device you are looking for based on advertisement data
@@ -54,7 +69,7 @@ class SensorBluetooth extends Component {
 			// if (device.id === 'A4:CF:12:32:19:9E') {
 			// if (device.name === 'TrickyRoad') {
 			if (device.name === 'TrickyRoad') {
-				console.log("TrickyRoad")
+				console.log("Found TrickyRoad bluetooth hotspot")
 				// Stop scanning as it's not necessary if you are scanning for one device.
 				this.manager.stopDeviceScan();
 
@@ -63,25 +78,22 @@ class SensorBluetooth extends Component {
 				device.connect()
 				
     			.then((device) => {
-					
-					this.info("Discovering services and characteristics");
         			return device.discoverAllServicesAndCharacteristics()
     			})
     			.then((device) => {
-					this.info(device.id)
-					device.writeCharacteristicWithoutResponseForService(
+					console.log(device)
+					/*device.writeCharacteristicWithoutResponseForService(
 						0x1812,
 						0x2A3D,
 						"aGVsbG8gbWlzcyB0YXBweQ==",
 					)
 					.then((characteristic) => {
-						this.info(characteristic.value);
 						return 
-					})
+					})*/
 				   // Do work on device with services and characteristics
-					this.setState({connected: true})
 					this.setState({deviceConnected : device})
 					this.setState({deviceId: device.id})
+					this.setState({connected: true})
 				})
     			.catch((error) => {
 					console.log(error)
@@ -90,21 +102,40 @@ class SensorBluetooth extends Component {
 		});
 	}
 
+	sendMessage(text) {
+		if(this.state.connected) {
+
+			this.state.deviceConnected.writeCharacteristicWithoutResponseForService(
+				"1812",
+				"2A3D",
+				base64.encode(text)
+			)
+				.then((characteristic) => {
+					console.log('message send')
+				})
+		}
+	}
+
 	disconnect() {
-		console.log(this.state.deviceConnected)
 		// this.state.deviceConnected.cancelConnection()
 		this.manager.cancelDeviceConnection(this.state.deviceId)
-		.then(() => console.log("disconnected"))
-		.then(this.setState({connected : false}))
-		.then(this.setState({deviceConnected: null}))
-		.then(this.setState({}))
+			.then(this.setState({connected : false}))
+			.then(this.setState({deviceConnected: null}))
+			.then(this.setState({}))
 
+	}
+
+	onChangeText(text) {
+		this.setState({value: text})
 	}
 
 	render() {
 		console.log("ETAT CONNEXION : ", this.state.connected)
+		console.log(this.props.value.left+','+this.props.value.top)
+		this.sendMessage(Math.round(this.props.value.left)+','+Math.round(this.props.value.top))
 		if(this.state.connected === false) {
 			return (
+				
 				<SafeAreaView style={styles.container}>
 	
 					<View>
@@ -122,9 +153,6 @@ class SensorBluetooth extends Component {
 						title="Disconnect !
 						">
 						</Button>
-						<View style={styles.statusFalse}>
-							<Text>SHIBAS</Text>
-						</View>
 					</View>
 				  </SafeAreaView>
 			);
@@ -132,6 +160,7 @@ class SensorBluetooth extends Component {
 
 		else {
 			return (
+				
 				<SafeAreaView style={styles.container}>
 	
 					<View>
@@ -146,21 +175,29 @@ class SensorBluetooth extends Component {
 						onPress = {() => {
 							this.disconnect()
 						}}
-						title="Disconnect !
-						">
+						title="Disconnect !">
 						</Button>
-						<View style={styles.statusTrue}>
-							<Text>SHIBAS</Text>
-						</View>
 					</View>
 				  </SafeAreaView>
 			);
 		}
-
-		
 	}
 }
 
+
+/*
+<TextInput
+style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+onChangeText={text => this.onChangeText(text)}
+value={this.state.value}
+/>
+<Button 
+onPress = {() => {
+	this.sendMessage()
+}}
+title="SendMessage">
+</Button>
+*/
 const styles = StyleSheet.create({
 	container: {
 	//   backgroundColor: '#a92a35',
