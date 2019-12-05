@@ -58,7 +58,7 @@ export default class GyroscopeMode extends Component {
   }
 
   _unsubscribe = () => {
-    this._subscription && this._subscription.remove();
+    this._subscription && this._subscription.unsubscribe();
     this._subscription = null;
   };
 
