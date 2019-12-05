@@ -127,7 +127,7 @@ export default class GyroscopeMode extends Component {
           </Modal>
 
           {/* <SensorBluetooth/> */}
-          <View style={styles.debug}>
+          <View style={gyro.debug}>
             <Text style= {{ fontSize: 20, color: 'white'}}>
               Gyro :
               x: {round(x)} y: {round(y)} z: {round(z)}
