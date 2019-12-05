@@ -7,12 +7,12 @@ import {
 } from "react-native-sensors";
 
 import LeaveButton from './LeaveButton'
-import SensorBluetooth from './SensorBluetooth';
+// import SensorBluetooth from './SensorBluetooth';
 
 export default class GyroscopeMode extends Component {
   state = {
-    // gyroscopeData: {},
-    // delta: { x: 0, y: 0, z: 0},
+    gyroscopeData: {},
+    delta: { x: 0, y: 0, z: 0},
     modalVisible: true,
   };
 
@@ -20,25 +20,21 @@ export default class GyroscopeMode extends Component {
     this.setState({modalVisible: visible});
   }
 
-  _subscribe = gyroscope.subscribe(({ x, y, z, timestamp }) =>
-  console.log({ x, y, z, timestamp })
-);
+  componentDidMount() {
+    this._toggle()
+  }
 
-  // componentDidMount() {
-  //   this._toggle();
-  // }
+  componentWillUnmount() {
+    this._unsubscribe();
+  }
 
-  // componentWillUnmount() {
-  //   this._unsubscribe();
-  // }
-
-  // _toggle = () => {
-  //   if (this._subscription) {
-  //     this._unsubscribe();
-  //   } else {
-  //     this._subscribe();
-  //   }
-  // };
+  _toggle = () => {
+    if (this._subscription) {
+      this._unsubscribe();
+    } else {
+      this._subscribe();
+    }
+  };
 
   // _slow = () => {
   //   Gyroscope.setUpdateInterval(1000);
@@ -54,50 +50,57 @@ export default class GyroscopeMode extends Component {
   //   });
   // };
 
-  // _unsubscribe = () => {
-  //   this._subscription && this._subscription.remove();
-  //   this._subscription = null;
-  // };
+  _subscribe = () => {
+    this._subscription = gyroscope.subscribe( ({x, y, z}) => {
+      this.setState({gyroscopeData: {x,y,z}})
+      console.log(this.state.gyroscopeData)
+    });
+  }
+
+  _unsubscribe = () => {
+    this._subscription && this._subscription.remove();
+    this._subscription = null;
+  };
 
   launchGame () {
     this.state.delta = this.state.gyroscopeData
   }
 
-  // getCalculatedCoords () {
-  //   return { 
-  //     x2: this.state.gyroscopeData.x - this.state.delta.x,
-  //     y2: this.state.gyroscopeData.y - this.state.delta.y,
-  //     z2: this.state.gyroscopeData.z - this.state.delta.z,
-  //   }
-  // }
+  getCalculatedCoords () {
+    return { 
+      x2: this.state.gyroscopeData.x - this.state.delta.x,
+      y2: this.state.gyroscopeData.y - this.state.delta.y,
+      z2: this.state.gyroscopeData.z - this.state.delta.z,
+    }
+  }
 
   render() {
-    // let { x, y, z } = this.state.gyroscopeData;
-    // let { x2, y2, z2 } = this.getCalculatedCoords()
+    let { x, y, z } = this.state.gyroscopeData;
+    let { x2, y2, z2 } = this.getCalculatedCoords()
     
     return (
-      <SafeAreaView style={gyroscope.container}>
-        <ImageBackground source={require('../assets/background.jpg')} style={gyroscope.background}>
-          <View style={gyroscope.infos}>
-            <View style={gyroscope.timer}>
-              <Text style={gyroscope.timerValue}>
+      <SafeAreaView style={styles.container}>
+        <ImageBackground source={require('../assets/background.jpg')} style={styles.background}>
+          <View style={styles.infos}>
+            <View style={styles.timer}>
+              <Text style={styles.timerValue}>
                 00:00
               </Text>
             </View>
-            <View style={gyroscope.selectedMode}>
+            <View style={styles.selectedMode}>
               <Image 
                 resizeMode={'contain'}
-                style={gyroscope.img}
+                style={styles.img}
                 source={require('../assets/icons/gyroscope.png')}
               />
             </View>
           </View>
-          <View style={gyroscope.visuContainer}>
-            <Image style={gyroscope.imgTMP} resizeMode={'contain'}
+          <View style={styles.visuContainer}>
+            <Image style={styles.imgTMP} resizeMode={'contain'}
               source={require('../assets/tmp.png')}
             />
           </View>
-          <View style={gyroscope.leaveContainer}>
+          <View style={styles.leaveContainer}>
             { !this.state.modalVisible && <LeaveButton></LeaveButton>}
           </View>
           <Modal
@@ -109,22 +112,22 @@ export default class GyroscopeMode extends Component {
             }}
           >
             
-            <View style={gyroscope.modalContainer}>
-              <View style={gyroscope.modal}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modal}>
               <Text style= {{ fontSize: 18, fontWeight: 'bold', color: 'white'}}>
                   Are you ready ?
                 </Text>
                 <TouchableOpacity onPress={() => {this.setModalVisible(!this.state.modalVisible);  this.launchGame()}}>
-                  <View style = {gyroscope.buttonContainer}>
-                    <Text style = {gyroscope.buttonTitle}>Yes</Text>
+                  <View style = {styles.buttonContainer}>
+                    <Text style = {styles.buttonTitle}>Yes</Text>
                   </View>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
 
-          <SensorBluetooth/>
-          {/* <View style={gyroscope.debug}>
+          {/* <SensorBluetooth/> */}
+          <View style={styles.debug}>
             <Text style= {{ fontSize: 20, color: 'white'}}>
               Gyro :
               x: {round(x)} y: {round(y)} z: {round(z)}
@@ -137,9 +140,9 @@ export default class GyroscopeMode extends Component {
               Reset :
               x: {round(x2)} y: {round(y2)} z: {round(z2)}
             </Text>
-          </View> */}
+          </View>
         </ImageBackground>
-      </SafeAreaView>
+      </SafeAreaView> 
     );
   }
 }
@@ -152,7 +155,7 @@ function round(n) {
   return Math.floor(n * 100) / 100;
 }
 
-const gyroscope = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
