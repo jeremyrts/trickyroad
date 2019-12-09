@@ -3,17 +3,17 @@ import { StyleSheet, SafeAreaView, ImageBackground, Text, View, Image, Touchable
 // import { Gyroscope } from 'expo-sensors';
 
 import {
-  gyroscope,
+  gyroscope
 } from "react-native-sensors";
 
 import LeaveButton from './LeaveButton'
-// import SensorBluetooth from './SensorBluetooth';
+import SensorBluetooth from './SensorBluetooth';
 
 export default class GyroscopeMode extends Component {
   state = {
     gyroscopeData: {},
     delta: { x: 0, y: 0, z: 0},
-    modalVisible: true,
+    modalVisible: false,
   };
 
   setModalVisible(visible) {
@@ -53,7 +53,6 @@ export default class GyroscopeMode extends Component {
   _subscribe = () => {
     this._subscription = gyroscope.subscribe( ({x, y, z}) => {
       this.setState({gyroscopeData: {x,y,z}})
-      console.log(this.state.gyroscopeData)
     });
   }
 
@@ -81,6 +80,7 @@ export default class GyroscopeMode extends Component {
     return (
       <SafeAreaView style={gyro.container}>
         <ImageBackground source={require('../assets/background.jpg')} style={gyro.background}>
+          <SensorBluetooth style={gyro.ble} value={{left: this.state.gyroscopeData.x, top: this.state.gyroscopeData.y}} />
           <View style={gyro.infos}>
             <View style={gyro.timer}>
               <Text style={gyro.timerValue}>
@@ -101,7 +101,7 @@ export default class GyroscopeMode extends Component {
             />
           </View>
           <View style={gyro.leaveContainer}>
-            { !this.state.modalVisible && <LeaveButton></LeaveButton>}
+            {/* !this.state.modalVisible && <LeaveButton></LeaveButton>*/}
           </View>
           <Modal
             animationType="slide"
@@ -125,10 +125,8 @@ export default class GyroscopeMode extends Component {
               </View>
             </View>
           </Modal>
-
-          {/* <SensorBluetooth/> */}
           <View style={gyro.debug}>
-            <Text style= {{ fontSize: 20, color: 'white'}}>
+           {/* <Text style= {{ fontSize: 20, color: 'white'}}>
               Gyro :
               x: {round(x)} y: {round(y)} z: {round(z)}
             </Text>
@@ -139,7 +137,7 @@ export default class GyroscopeMode extends Component {
             <Text style= {{ fontSize: 20, color: 'white'}}>
               Reset :
               x: {round(x2)} y: {round(y2)} z: {round(z2)}
-            </Text>
+          </Text> */}
           </View>
         </ImageBackground>
       </SafeAreaView> 
@@ -239,6 +237,11 @@ const gyro = StyleSheet.create({
     color: '#623231',
     fontSize: 18,
     fontWeight: 'bold'
+  },
+  ble: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
   }
 
 });

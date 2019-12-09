@@ -29,7 +29,6 @@ export default class TouchMode extends Component {
       // The most recent move distance is gestureState.move{X,Y}
       // The accumulated gesture distance since becoming responder is
       // gestureState.d{x,y}
-      console.log(Dimensions.get('window').width, Dimensions.get('window').height)
       this.setState({
         left: Math.max(0, Math.min(180, (((gestureState.dx/2) / Dimensions.get('window').width) + 0.5 ) * 180)) ,
         top: Math.max(0,Math.min(180, (((gestureState.dy/2) / Dimensions.get('window').height) + 0.5) * 180)),

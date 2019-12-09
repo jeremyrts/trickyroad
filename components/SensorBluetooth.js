@@ -131,7 +131,6 @@ class SensorBluetooth extends Component {
 
 	render() {
 		console.log("ETAT CONNEXION : ", this.state.connected)
-		console.log(this.props.value.left+','+this.props.value.top)
 		this.sendMessage(Math.round(this.props.value.left)+','+Math.round(this.props.value.top))
 		if(this.state.connected === false) {
 			return (
@@ -141,6 +140,7 @@ class SensorBluetooth extends Component {
 					<View>
 						<Button 
 						onPress = {() => {
+							console.log('clicked')
 							this.scanAndConnect()
 						}}
 						title="Connect">
