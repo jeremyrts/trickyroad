@@ -74,14 +74,33 @@ class SensorBluetooth extends Component {
 				this.manager.stopDeviceScan();
 
 				// Proceed with connection.
-				console.log("Connecting to "+device.name)
-				device.connect()
+				console.log("Connecting to "+device.name+" with id : "+device.id)
+				// device.connect()
+				this.manager.connectToDevice(device.id)
+				// this.setState({connected: true})
 				
     			.then((device) => {
-        			return device.discoverAllServicesAndCharacteristics()
-    			})
+					console.log("Discovering services and characteristics for ")
+					console.log(this.state.deviceId)
+        			// return device.discoverAllServicesAndCharacteristics()
+        			return this.manager.discoverAllServicesAndCharacteristicsForDevice(this.state.deviceId)
+				})
+				.then((device,result) => {
+					console.log("Les services et characteristics de "+device.name+" :")
+					console.log(JSON.stringify(result))
+					// console.log(device.id)
+					// for (service of device.services()) {
+					// console.log(JSON.stringify(this.manager.servicesForDevice(device.id)))
+					// }
+				})
     			.then((device) => {
-					console.log(device)
+					// console.log("Service datas : ")
+					// console.log(device.services())
+					// device.services()
+					// .then((result) => {
+					// 	console.log(JSON.stringify(result))
+					// })
+
 					/*device.writeCharacteristicWithoutResponseForService(
 						0x1812,
 						0x2A3D,
@@ -91,9 +110,12 @@ class SensorBluetooth extends Component {
 						return 
 					})*/
 				   // Do work on device with services and characteristics
+					
+					// this.sendMessage("shiba")
 					this.setState({deviceConnected : device})
 					this.setState({deviceId: device.id})
 					this.setState({connected: true})
+					console.log(this.state.deviceId)
 				})
     			.catch((error) => {
 					console.log(error)
@@ -104,15 +126,21 @@ class SensorBluetooth extends Component {
 
 	sendMessage(text) {
 		if(this.state.connected) {
-
-			this.state.deviceConnected.writeCharacteristicWithoutResponseForService(
+			// return device.discoverAllServicesAndCharacteristics()
+		
+			this.state.deviceConnected.writeCharacteristicWithResponseForService(
 				"1812",
-				"2A3D",
+				// "00002A33-0000-1000-8000-00805F9B34FB",
+				"2A33",
 				base64.encode(text)
 			)
-				.then((characteristic) => {
-					console.log('message send')
-				})
+			
+			.then((characteristic) => {
+				console.log('message send')
+			})
+			.catch((error) => {
+				console.log(error)
+			})
 		}
 	}
 
@@ -131,6 +159,7 @@ class SensorBluetooth extends Component {
 
 	render() {
 		console.log("ETAT CONNEXION : ", this.state.connected)
+		// console.log(this.state)
 		this.sendMessage(Math.round(this.props.value.left)+','+Math.round(this.props.value.top))
 		if(this.state.connected === false) {
 			return (
