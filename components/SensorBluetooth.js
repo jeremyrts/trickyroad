@@ -35,6 +35,34 @@ class SensorBluetooth extends Component {
 	}
 
 	
+	// async getServicesAndCharacteristicsForDevice(device) {
+    //     var servicesMap = {}
+    //     var services = await device.services()
+    //     for (let service of services) {
+    //         var characteristicsMap = {}
+    //         var characteristics = await service.characteristics()
+
+    //         for (let characteristic of characteristics) {
+    //             characteristicsMap[characteristic.uuid] = {
+    //                 uuid: characteristic.uuid,
+    //                 isReadable: characteristic.isReadable,
+    //                 isWritableWithResponse: characteristic.isWritableWithResponse,
+    //                 isWritableWithoutResponse: characteristic.isWritableWithoutResponse,
+    //                 isNotifiable: characteristic.isNotifiable,
+    //                 isNotifying: characteristic.isNotifying,
+    //                 value: characteristic.value
+    //             }
+    //         }
+
+    //         servicesMap[service.uuid] = {
+    //             uuid: service.uuid,
+    //             isPrimary: service.isPrimary,
+    //             characteristicsCount: characteristics.length,
+    //             characteristics: characteristicsMap
+    //         }
+    //     }
+    //     return servicesMap
+    // }
 
 
 	// componentDidMount() {
@@ -74,14 +102,17 @@ class SensorBluetooth extends Component {
 				this.manager.stopDeviceScan();
 
 				// Proceed with connection.
-				console.log("Connecting to "+device.name)
+				console.log("Connecting to "+device.name+" with id: "+device.id)
 				device.connect()
-				
     			.then((device) => {
+					console.log("Recherche des services de du device qui a l'id: "+device.id)
         			return device.discoverAllServicesAndCharacteristics()
     			})
-    			.then((device) => {
-					console.log(device)
+    			.then((device, services) => {
+					// console.log(device)
+					console.log("Stockage des infos dans le state device avec l'id: "+device.id)
+					console.log(services)
+
 					/*device.writeCharacteristicWithoutResponseForService(
 						0x1812,
 						0x2A3D,
@@ -95,6 +126,16 @@ class SensorBluetooth extends Component {
 					this.setState({deviceId: device.id})
 					this.setState({connected: true})
 				})
+				.then(() => {
+					console.log("Device id : "+this.state.deviceId)
+				})
+				.then(() => {
+					return device.services()
+				})
+				.then((services) => {
+					console.log("Les services")
+					console.log(services)
+				})
     			.catch((error) => {
 					console.log(error)
     			});
@@ -103,16 +144,28 @@ class SensorBluetooth extends Component {
 	}
 
 	sendMessage(text) {
-		if(this.state.connected) {
+		if(this.state.deviceConnected !== null) {
+			console.log("SendMessage "+this.state.deviceId)
 
-			this.state.deviceConnected.writeCharacteristicWithoutResponseForService(
-				"1812",
-				"2A3D",
-				base64.encode(text)
-			)
+			return this.state.deviceConnected.discoverAllServicesAndCharacteristics()
+			.then(() => {
+				this.state.deviceConnected.writeCharacteristicWithoutResponseForService(
+					"1812",
+					"2A3D",
+					base64.encode(text)
+				)
 				.then((characteristic) => {
 					console.log('message send')
 				})
+				.catch((error) => {
+					console.log("SEND Message 1")
+					console.log(error)
+				})
+			})
+			.catch((error) => {
+				console.log("SEND Message 2")
+				console.log(error)
+			})
 		}
 	}
 
@@ -122,7 +175,6 @@ class SensorBluetooth extends Component {
 			.then(this.setState({connected : false}))
 			.then(this.setState({deviceConnected: null}))
 			.then(this.setState({}))
-
 	}
 
 	onChangeText(text) {
@@ -132,55 +184,55 @@ class SensorBluetooth extends Component {
 	render() {
 		console.log("ETAT CONNEXION : ", this.state.connected)
 		this.sendMessage(Math.round(this.props.value.left)+','+Math.round(this.props.value.top))
-		if(this.state.connected === false) {
-			return (
+		// if(this.state.connected === false) {
+		// 	return (
 				
-				<SafeAreaView style={styles.container}>
+		// 		<SafeAreaView style={styles.container}>
 	
-					<View>
-						<Button 
-						onPress = {() => {
-							console.log('clicked')
-							this.scanAndConnect()
-						}}
-						title="Connect">
-						</Button>
+		// 			<View>
+		// 				<Button 
+		// 				onPress = {() => {
+		// 					console.log('clicked')
+		// 					this.scanAndConnect()
+		// 				}}
+		// 				title="Connect">
+		// 				</Button>
 	
-						<Button 
-						onPress = {() => {
-							this.disconnect()
-						}}
-						title="Disconnect !
-						">
-						</Button>
-					</View>
-				  </SafeAreaView>
-			);
-		}
+		// 				<Button 
+		// 				onPress = {() => {
+		// 					this.disconnect()
+		// 				}}
+		// 				title="Disconnect !
+		// 				">
+		// 				</Button>
+		// 			</View>
+		// 		  </SafeAreaView>
+		// 	);
+		// }
 
-		else {
-			return (
-				
-				<SafeAreaView style={styles.container}>
-	
-					<View>
-						<Button 
-						onPress = {() => {
-							this.scanAndConnect()
-						}}
-						title="Connect">
-						</Button>
-	
-						<Button 
-						onPress = {() => {
-							this.disconnect()
-						}}
-						title="Disconnect !">
-						</Button>
-					</View>
-				  </SafeAreaView>
-			);
-		}
+		// else {
+		return (
+			
+			<SafeAreaView style={styles.container}>
+
+				<View>
+					<Button 
+					onPress = {() => {
+						this.scanAndConnect()
+					}}
+					title="Connect">
+					</Button>
+
+					<Button 
+					onPress = {() => {
+						this.disconnect()
+					}}
+					title="Disconnect !">
+					</Button>
+				</View>
+				</SafeAreaView>
+		);
+		// }
 	}
 }
 
