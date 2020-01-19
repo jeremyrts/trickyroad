@@ -12,9 +12,6 @@ export default class LadderButton extends Component {
       </TouchableOpacity>
     );
   }
-  // onPress() {
-  //   alert('Simple Button pressed')
-  // }
 }
 
 const score = StyleSheet.create({
