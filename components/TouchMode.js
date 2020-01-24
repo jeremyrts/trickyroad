@@ -1,14 +1,96 @@
 import React, { Component } from 'react';
-import { StyleSheet, SafeAreaView, ImageBackground, Text, View, Image, PanResponder } from 'react-native';
+import { StyleSheet, SafeAreaView, ImageBackground, Text, View, Image, PanResponder, TouchableOpacity, AsyncStorage } from 'react-native';
 import LeaveButton from './LeaveButton'
+import firebase from 'firebase'
+import { Cache } from "react-native-cache"
+
+import base from '../base'
 
 export default class TouchMode extends Component {
-  constructor(){
-    super();
-    this.state = {
-      left: 0,
-      top: 0
-    }
+  
+  state = {
+    left: 0,
+    top: 0,
+    messages: {},
+    cache: null
+  }
+  
+
+  componentDidMount () {
+    this.state.cache = new Cache({
+      namespace: "myapp",
+      policy: {
+          maxEntries: 50000
+      },
+      backend: AsyncStorage
+    })
+
+    this.state.cache.getItem("pseudo", function(err, value) {
+      console.log("Get from previous cache " + value);
+    });
+
+    // base.syncState('/', {
+    //   context: this,
+    //   state: 'messages'
+    // })
+    //console.log(this.state.messages)
+  }
+
+  addPseudoToCache() {
+    const pseudo = "toot"
+    const score = 1500
+
+    base.fetch('users', {
+      context: this,
+      asArray: true,
+      then(data){
+        console.log(data);
+        const users = data
+        const present = users.filter((item) => item.key === pseudo)
+
+        if(present) {
+          this.state.cache.setItem("pseudo", pseudo, function(err) {
+            if(err) { 
+              console.log('error when add')
+              return
+            }
+      
+            base.post(`users/${pseudo}`, {
+              data: {score: [{
+                date: new Date().toString(),
+                value: score
+              }]},
+              then(err){
+                if(!err){
+                  console.log('succesfully added')
+                }
+              }
+            })
+      
+          })
+        }
+        else {
+          base.update(`users/${pseudo}`, {
+            data: {score: [
+              ...present[0].score,
+              {
+              date: new Date().toString(),
+              value: score
+            }]},
+            then(err){
+              if(!err){
+                console.log('succesfully added')
+              }
+            }
+          });
+        }
+      }
+    });
+  }
+
+  removePseudoFromCache() {
+    this.state.cache.removeItem("pseudo", function(err) {
+    })
   }
 
   _panResponder = PanResponder.create({
@@ -73,7 +155,9 @@ export default class TouchMode extends Component {
           </View>
           <View style={touch.leaveContainer}>
             <LeaveButton></LeaveButton>
-          </View>
+            <TouchableOpacity onPress={()=> this.addPseudoToCache()}><View ><Text>Add pseudal</Text></View></TouchableOpacity>
+            <TouchableOpacity onPress={()=> this.removePseudoFromCache()}><View ><Text>delete pseudal</Text></View></TouchableOpacity>
+           </View>
           <View style={touch.debug}>
             <Text style= {{ fontSize: 20, color: 'white'}}>
             Position du doigt :
