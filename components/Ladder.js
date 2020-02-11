@@ -1,7 +1,72 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, SafeAreaView, ImageBackground, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, ImageBackground, TouchableOpacity, AsyncStorage } from 'react-native';
+import { Cache } from "react-native-cache"
+import base from '../base'
+
 export default class Ladder extends Component {
-	state = {  }
+	state = {
+		bestScores: [],
+		cache: null, 
+		user: null
+	}
+
+	componentDidMount () {
+		
+		this.state.cache = new Cache({
+			namespace: "myapp",
+			policy: {
+				maxEntries: 50000
+			},
+			backend: AsyncStorage
+		})
+		this.state.cache.getItem("pseudo", function(err, value) {
+			this.setState({...this.state, user: value})
+		}.bind(this));
+		this.getScores()
+	}
+
+	getScores() {
+		base.fetch('users', {
+			context: this,
+			asArray: true,
+			then(data){
+				const displaySize = 8
+				let scores = data.sort((a,b) => a.bestScore.value > b.bestScore.value)
+
+				let myScorePos = null
+				for(let i = 0; i < scores.length; i++) {
+					if(scores[i].bestScore.user === this.state.user) {
+						myScorePos = i
+						break
+					}
+				}
+
+				if(scores.length > displaySize) {
+					if(myScorePos < displaySize) {
+						scores = scores.slice(0, displaySize)
+					} else {
+						const myScore = scores[myScorePos]
+						scores = [...scores.slice(0,displaySize-1), myScore]
+						myScorePos = displaySize-1
+					}
+				}
+
+				this.setState({...this.state, bestScores: scores.reduce((acc, score, index) => {
+					let styles = [ladder.item]
+					
+					if(index === myScorePos){
+						styles.push(ladder.myScore)
+					}
+					let date = new Date(0)
+					date.setSeconds(parseInt(score.bestScore.value)) // specify value for SECONDS here
+					let timeString = date.toISOString().substr(14, 5)
+
+					return [...acc, <View><Text style={styles}>{score.bestScore.user}</Text><Text style={[...styles,ladder.time]}>{timeString}</Text></View>]
+				}, [])}) 
+			}	
+		});
+	}
+
 	render() {
 		return (
 			<SafeAreaView style={ladder.container}>
@@ -19,10 +84,7 @@ export default class Ladder extends Component {
 							</View>
 							<View style={ladder.infosValue}>
 								{/* Module à part pour récupérer les couples pseudo/scores */}
-								<Text style={ladder.item}>Nickname 1 00:30</Text>
-								<Text style={ladder.item}>Nickname 1 00:30</Text>
-								<Text style={ladder.item}>Nickname 1 00:30</Text>
-								<Text style={ladder.item}>Nickname 1 00:30</Text>
+								{this.state.bestScores}
 							</View>
 						</View>
 					</View>
@@ -81,7 +143,16 @@ const ladder = StyleSheet.create({
 		marginBottom: 10,
 		fontSize: 20,
     	color: 'white',
-		fontWeight: 'bold',
+		fontWeight: 'bold'
+
+	},
+	time: {
+		position: "absolute",
+		right: 0,
+		fontWeight: 'normal'
+	},
+	myScore: {
+		color: '#FFF737'
 	}
 
 })

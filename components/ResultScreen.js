@@ -1,14 +1,140 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, SafeAreaView, ImageBackground, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, ImageBackground, TouchableOpacity, TextInput, AsyncStorage } from 'react-native';
 import FooterMenu from './FooterMenu'
-export default class ResultScreen extends Component {
-	state = { 
-		user:''
-	 }
+import { Cache } from "react-native-cache"
+import base from '../base'
+import { withNavigation } from 'react-navigation';
 
+class ResultScreen extends Component {
+	state = { 
+		user:null,
+		score: null,
+		cache: null
+	}
+
+	componentDidMount () {
+		
+		this.state.score = this.props.score ? this.props.score : 1500 
+
+		this.state.cache = new Cache({
+			namespace: "myapp",
+			policy: {
+				maxEntries: 50000
+			},
+			backend: AsyncStorage
+		})
+		this.state.cache.getItem("pseudo", function(err, value) {
+			this.setState({...this.state, user: value})
+		}.bind(this));
+	}
+
+	saveScore() {
+		const pseudo = this.state.user
+		const score = this.state.score
+		const self = this
+		if(!score) return
+
+		base.fetch('users', {
+			context: this,
+			asArray: true,
+			then(data){
+			const users = data
+			const present = users.filter((item) => item.key === pseudo)
+			
+			if(present.length === 0) {
+				this.createUser()
+			}
+			else {
+				base.update(`users/${pseudo}`, {
+				data: {scores: [
+					...present[0].scores,
+					{
+					date: new Date().toString(),
+					value: score,
+					user: pseudo
+					}
+					],
+					bestScore: {
+						date: new Date().toString(),
+						value: present[0].bestScore > score ? present[0].bestScore : score,
+						user: pseudo
+					}
+				},
+				then(err){
+					if(!err){
+						self.props.navigation.navigate('Home')
+					}
+				}
+				});
+			}
+			}
+		});
+	}
+
+	createUser() {
+		const score = this.state.score
+		const pseudo = this.state.user
+		const self = this
+
+		if(this.state.user){
+			if(!this.state.user.includes(' ')) {
+				this.state.cache.setItem("pseudo", this.state.user, function(err) {
+					if(err) { 
+						console.log('error when add')
+						return
+					}
+				
+					base.post(`users/${pseudo}`, {
+							data: {scores: [{
+								date: new Date().toString(),
+								value: score,
+								user: pseudo
+								}
+							],
+							bestScore: {
+								date: new Date().toString(),
+								value: score,
+								user: pseudo
+								}
+						},
+						then(err){
+							if(!err){
+								console.log('succesfully added')
+								self.props.navigation.navigate('Home')
+							}
+						}
+					})
+			
+				})
+			}
+			else {
+				alert("Do not use space in the name")
+			}
+		}
+		else {
+			alert("Please fill in the text input")
+		}
+		this.textInput.clear()
+	}
 	render() {
+		const connectionForm = <View>
+			<Text style={resultScreen.saveModuleTitle}> Connect you to save your score </Text>
+			<TextInput style={resultScreen.textInput} 
+				onChangeText={(user) => this.setState({user})} 
+				value={this.state.text} 
+				clearButtonMode="unless-editing" 
+				ref={input => { this.textInput = input }} />
+			</View>
+
+		const test = <View></View>
+		let {user} = this.state
+		let inscriptionForm;
+			if(user){
+				inscriptionForm = test
+			} else {
+				inscriptionForm = connectionForm
+			}
 		if(!this.props.won) {
-			console.log(this.state.user)
 			return (
 				<SafeAreaView style={resultScreen.container}>
 					<ImageBackground source={require('../assets/background.jpg')} style={resultScreen.background}>
@@ -20,15 +146,10 @@ export default class ResultScreen extends Component {
 									<Text style={resultScreen.subtitleValue}>00:29</Text>
 								</View>
 								<View style={resultScreen.saveModule}>
-									<Text style={resultScreen.saveModuleTitle}> Connect you to save your score </Text>
-									<TextInput
-        								style={resultScreen.textInput}
-										onChangeText={(user) => this.setState({user})}
-										value={this.state.text}
-										clearButtonMode="unless-editing"
-										ref={input => { this.textInput = input }}
-      								/>
-									<TouchableOpacity onPress={() => {this.validate()}} style={resultScreen.buttonModule}>
+									{inscriptionForm}
+									<TouchableOpacity onPress={() => {
+										this.state.user ? this.saveScore() : this.createUser()
+										}} style={resultScreen.buttonModule}>
 										<Text style={resultScreen.buttonModuleTitle}>Save your score</Text>
 									</TouchableOpacity>
 								</View>
@@ -66,7 +187,7 @@ export default class ResultScreen extends Component {
 								</View>
 								
 							</View>
-							{/* <View style={resultScreen.footer}>
+							{/* <View style={resultScthis.state.userreen.footer}>
 								<TouchableOpacity style={resultScreen.button}>
 									<Text>Home</Text>
 								</TouchableOpacity>
@@ -85,21 +206,6 @@ export default class ResultScreen extends Component {
 			)
 		}
 		
-	}
-
-	validate() {
-		
-		if(this.state.user !== ""){
-			if(!this.state.user.includes(' '))
-				alert("Welcome "+ this.state.user)
-			else {
-				alert("Do not use space in the name")
-			}
-		}
-		else {
-			alert("Please fill in the text input")
-		}
-		this.textInput.clear()
 	}
 }
 
@@ -211,3 +317,5 @@ const resultScreen = StyleSheet.create({
 	}
 
 })
+
+export default withNavigation(ResultScreen);
