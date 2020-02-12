@@ -127,6 +127,7 @@ class SensorBluetooth extends Component {
 					this.setState({connected: true})
 				})
 				.then(() => {
+					setInterval(this.getMessage.bind(this), 3000)
 					console.log("Device id : "+this.state.deviceId)
 				})
 				.then(() => {
@@ -169,6 +170,39 @@ class SensorBluetooth extends Component {
 		}
 	}
 
+	getMessage() {
+		console.log('YO CA MRCHE')
+		if(this.state.deviceConnected !== null) {
+			console.log("Get message ")
+			return this.state.deviceConnected.monitorCharacteristicForService(
+				"1812",
+				"2A3D",
+				(error, characteristic) => {
+					console.log(error, characteristic)
+				}
+			)
+		}
+	}
+
+	async setupNotifications(device) {
+		let snifferService = null
+
+		device.services().then(services => {
+			let voltageCharacteristic = null
+
+			snifferService = services.filter(service => service.uuid === SERVICE_SNIFFER_UUID)[0]
+			snifferService.characteristics()
+			.then(characteristics => {
+				// voltageCharacteristic is retrieved correctly and data is also seems correct
+				voltageCharacteristic = characteristics.filter(c => c.uuid === SNIFFER_VOLTAGE_UUID)[0]
+				voltageCharacteristic.monitor((error, c) => {
+				// RECEIVED THE ERROR HERE (voltageCharacteristic.notifiable === true)
+				})
+			})
+			.catch(error => console.log(error))
+		})
+	}
+
 	disconnect() {
 		// this.state.deviceConnected.cancelConnection()
 		this.manager.cancelDeviceConnection(this.state.deviceId)
@@ -179,6 +213,9 @@ class SensorBluetooth extends Component {
 
 	onChangeText(text) {
 		this.setState({value: text})
+	}
+
+	componentDidMount() {
 	}
 
 	render() {
