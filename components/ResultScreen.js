@@ -14,8 +14,7 @@ class ResultScreen extends Component {
 
 	componentDidMount () {
 		
-		this.state.score = this.props.score ? this.props.score : 1500 
-
+		this.state.score = this.props.navigation.state.params.score ? this.props.navigation.state.params.score : 1500 
 		this.state.cache = new Cache({
 			namespace: "myapp",
 			policy: {
@@ -143,7 +142,7 @@ class ResultScreen extends Component {
 								<View style={resultScreen.title}>
 									<Text style={resultScreen.titleValue}>Congratulations</Text>
 									{/* Insérer le score obtenu */}
-									<Text style={resultScreen.subtitleValue}>00:29</Text>
+									<Texthis.props.scoret style={resultScreen.subtitleValue}>{this.props.navigation.state.params.score}</Text>
 								</View>
 								<View style={resultScreen.saveModule}>
 									{inscriptionForm}
@@ -171,7 +170,7 @@ class ResultScreen extends Component {
 								<View style={resultScreen.title}>
 									<Text style={resultScreen.titleValue}>So close...</Text>
 									{/* Insérer le score obtenu */}
-									<Text style={resultScreen.subtitleValue}>00:29</Text>
+									<Text style={resultScreen.subtitleValue}>{this.props.navigation.state.params.score}</Text>
 								</View>
 								<View style={resultScreen.leaderboard}>
 									<View style={resultScreen.leaderboardTitle}>

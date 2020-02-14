@@ -45,7 +45,7 @@ const AppNavigator = createStackNavigator({
     ResultScreen: { screen: ResultScreen }
   },
   {
-    initialRouteName: 'ResultScreen',
+    initialRouteName: 'Home',
     headerMode: 'none',
   }
 )

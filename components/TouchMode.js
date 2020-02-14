@@ -3,6 +3,7 @@ import { StyleSheet, SafeAreaView, ImageBackground, Text, View, Image, PanRespon
 import LeaveButton from './LeaveButton'
 
 import SensorBluetooth from './SensorBluetooth';
+import BluetoothManager from './BluetoothManager'
 
 export default class TouchMode extends Component {
   constructor(){
@@ -51,11 +52,10 @@ export default class TouchMode extends Component {
   });
   
   render() {
-    return (
-      <SafeAreaView style={touch.container}>
-        <ImageBackground source={require('../assets/background.jpg')} style={touch.background}>
-          <SensorBluetooth style={touch.ble} value={this.state}/>
-          <View style={touch.infos}>
+    //    <SensorBluetooth style={touch.ble} value={this.state}/>
+
+    /*
+<View style={touch.infos}>
             <View style={touch.timer}>
               <Text style={touch.timerValue}>
                 00:00
@@ -83,6 +83,12 @@ export default class TouchMode extends Component {
             x : { round(this.state.left) } y : { round(this.state.top) }
             </Text>
           </View>
+    */
+    return (
+      <SafeAreaView style={touch.container}>
+        <ImageBackground source={require('../assets/background.jpg')} style={touch.background}>
+          <BluetoothManager />
+          
         </ImageBackground>
       </SafeAreaView>
     );
