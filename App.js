@@ -41,7 +41,7 @@ const AppNavigator = createStackNavigator({
     TouchMode: { screen: TouchMode },
   },
   {
-    initialRouteName: 'ModeSelector',
+    initialRouteName: 'Home',
     headerMode: 'none' 
   }
 )
