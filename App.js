@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ImageBackground, Text, View, Image, SafeAreaView } from 'react-native';
+import { StyleSheet, ImageBackground, Text, View, Image, SafeAreaView, Sound } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
@@ -34,6 +34,20 @@ class HomeScreen extends React.Component {
       </SafeAreaView>
     );
   }
+
+  componentDidMount() {
+    var sound1 = new Sound('https://raw.githubusercontent.com/zmxv/react-native-sound-demo/master/pew2.aac', '',
+    (error, sound) => {
+    if (error) {
+      alert('error' + error.message);
+      return;
+    }
+    sound1.play(() => {
+      sound1.release();
+    });
+  });
+  }
+  
 }
  
 const AppNavigator = createStackNavigator({
