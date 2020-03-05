@@ -79,31 +79,29 @@ export default class GyroscopeMode extends Component {
     let { x2, y2, z2 } = this.getCalculatedCoords()
     /*<SensorBluetooth style={gyro.ble} value={{left: this.state.gyroscopeData.x, top: this.state.gyroscopeData.y}} />*/
     return (
-      <SafeAreaView style={gyro.container}>
-        <ImageBackground source={require('../assets/background.jpg')} style={gyro.background}>
-          <BluetoothManager />
-          
-          <View style={gyro.infos}>
-            <View style={gyro.timer}>
-              <Text style={gyro.timerValue}>
+      <SafeAreaView style={gyroStyle.container}>
+        <ImageBackground source={require('../assets/background.jpg')} style={gyroStyle.background}>
+          <View style={gyroStyle.infos}>
+            <View style={gyroStyle.timer}>
+              <Text style={gyroStyle.timerValue}>
                 00:00
               </Text>
             </View>
-            <View style={gyro.selectedMode}>
+            <View style={gyroStyle.selectedMode}>
               <Image 
                 resizeMode={'contain'}
-                style={gyro.img}
+                style={gyroStyle.img}
                 source={require('../assets/icons/gyroscope.png')}
               />
             </View>
           </View>
-          <View style={gyro.visuContainer}>
-            <Image style={gyro.imgTMP} resizeMode={'contain'}
+          <View style={gyroStyle.visuContainer}>
+            <Image style={gyroStyle.imgTMP} resizeMode={'contain'}
               source={require('../assets/tmp.png')}
             />
           </View>
-          <View style={gyro.leaveContainer}>
-            {/* !this.state.modalVisible && <LeaveButton></LeaveButton>*/}
+          <View style={gyroStyle.leaveContainer}>
+            { !this.state.modalVisible && <LeaveButton></LeaveButton>}
           </View>
           <Modal
             animationType="slide"
@@ -114,14 +112,14 @@ export default class GyroscopeMode extends Component {
             }}
           >
             
-            <View style={gyro.modalContainer}>
-              <View style={gyro.modal}>
+            <View style={gyroStyle.modalContainer}>
+              <View style={gyroStyle.modal}>
               <Text style= {{ fontSize: 18, fontWeight: 'bold', color: 'white'}}>
                   Are you ready ?
                 </Text>
                 <TouchableOpacity onPress={() => {this.setModalVisible(!this.state.modalVisible);  this.launchGame()}}>
-                  <View style = {gyro.buttonContainer}>
-                    <Text style = {gyro.buttonTitle}>Yes</Text>
+                  <View style = {gyroStyle.buttonContainer}>
+                    <Text style = {gyroStyle.buttonTitle}>Yes</Text>
                   </View>
                 </TouchableOpacity>
               </View>
@@ -155,7 +153,7 @@ function round(n) {
   return Math.floor(n * 100) / 100;
 }
 
-const gyro = StyleSheet.create({
+const gyroStyle = StyleSheet.create({
   container: {
     flex: 1,
   },
