@@ -5,9 +5,11 @@ import { createStackNavigator } from 'react-navigation-stack';
 
 import MainButton from './components/MainButton'
 import LadderButton from './components/LadderButton'
+import Ladder from './components/Ladder'
 import ModeSelector from './components/ModeSelector'
 import GyroscopeMode from './components/GyroscopeMode'
 import TouchMode from './components/TouchMode'
+import ResultScreen from './components/ResultScreen'
 
 class HomeScreen extends React.Component {
   render() {
@@ -25,7 +27,7 @@ class HomeScreen extends React.Component {
               <MainButton style={styles.playButton} title='Play' navigation={this.props.navigation} destination='ModeSelector'></MainButton>
             </View>
             <View style={styles.containerLadderButton}>
-              <LadderButton style={styles.ladderButton}></LadderButton>
+              <LadderButton style={styles.ladderButton} navigation={this.props.navigation} destination='Ladder'></LadderButton>
             </View>
           </View>
         </ImageBackground>
@@ -33,16 +35,18 @@ class HomeScreen extends React.Component {
     );
   }
 }
-
+ 
 const AppNavigator = createStackNavigator({
     Home: { screen: HomeScreen },
     ModeSelector: { screen: ModeSelector },
     GyroscopeMode: { screen: GyroscopeMode },
     TouchMode: { screen: TouchMode },
+    Ladder: { screen: Ladder },
+    ResultScreen: { screen: ResultScreen }
   },
   {
     initialRouteName: 'Home',
-    headerMode: 'none' 
+    headerMode: 'none',
   }
 )
 export default createAppContainer(AppNavigator);

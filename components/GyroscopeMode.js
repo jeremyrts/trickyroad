@@ -7,7 +7,8 @@ import {
 } from "react-native-sensors";
 
 import LeaveButton from './LeaveButton'
-import SensorBluetooth from './SensorBluetooth';
+import SensorBluetooth from './SensorBluetooth'
+import BluetoothManager from './BluetoothManager'
 
 export default class GyroscopeMode extends Component {
   state = {
@@ -76,11 +77,12 @@ export default class GyroscopeMode extends Component {
   render() {
     let { x, y, z } = this.state.gyroscopeData;
     let { x2, y2, z2 } = this.getCalculatedCoords()
-    
+    /*<SensorBluetooth style={gyro.ble} value={{left: this.state.gyroscopeData.x, top: this.state.gyroscopeData.y}} />*/
     return (
       <SafeAreaView style={gyro.container}>
         <ImageBackground source={require('../assets/background.jpg')} style={gyro.background}>
-          <SensorBluetooth style={gyro.ble} value={{left: this.state.gyroscopeData.x, top: this.state.gyroscopeData.y}} />
+          <BluetoothManager />
+          
           <View style={gyro.infos}>
             <View style={gyro.timer}>
               <Text style={gyro.timerValue}>

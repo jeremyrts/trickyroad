@@ -4,16 +4,13 @@ import { TouchableOpacity, StyleSheet, View, Image, Text } from 'react-native';
 export default class LadderButton extends Component {
   render() {
     return (
-      <TouchableOpacity style={score.container} onPress ={() => {this.onPress()}}>
+      <TouchableOpacity style={score.container} onPress ={() => this.props.navigation.navigate('Ladder')}>
         <Image resizeMode={'contain'}
           style={score.img}
           source={require('../assets/icons/ladder.png')}
         />
       </TouchableOpacity>
     );
-  }
-  onPress() {
-    alert('Simple Button pressed')
   }
 }
 
