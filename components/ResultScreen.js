@@ -142,7 +142,7 @@ class ResultScreen extends Component {
 								<View style={resultScreen.title}>
 									<Text style={resultScreen.titleValue}>Congratulations</Text>
 									{/* Insérer le score obtenu */}
-									<Texthis.props.scoret style={resultScreen.subtitleValue}>{this.props.navigation.state.params.score}</Text>
+									<Text style={resultScreen.subtitleValue}>{this.props.navigation.state.params.score}</Text>
 								</View>
 								<View style={resultScreen.saveModule}>
 									{inscriptionForm}
