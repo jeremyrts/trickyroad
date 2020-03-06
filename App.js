@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, ImageBackground, Text, View, Image, SafeAreaView } from 'react-native';
-import { Sound } from 'react-native-sound';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
@@ -38,14 +37,23 @@ class HomeScreen extends React.Component {
 
   componentDidMount() {
     var Sound = require('react-native-sound');
-    var sound1 = new Sound('https://raw.githubusercontent.com/zmxv/react-native-sound-demo/master/pew2.aac', '',
+    var musicLobby = new Sound(require('./assets/Thinking_About_The_Universe.mp3'),
     (error, sound) => {
     if (error) {
       alert('error' + error.message);
       return;
     }
-    sound1.play(() => {
-      sound1.release();
+    // Loop indefinitely until stop() is called
+    // musicLobby.setNumberOfLoops(-1);
+
+    musicLobby.play((success) => {
+      if (success) {
+        console.log('successfully finished playing');
+        musicLobby.release()
+        musicLobby.stop()
+      } else {
+        console.log('playback failed due to audio decoding errors');
+      }
     });
   });
   }
