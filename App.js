@@ -44,13 +44,12 @@ class HomeScreen extends React.Component {
       return;
     }
     // Loop indefinitely until stop() is called
-    // musicLobby.setNumberOfLoops(-1);
+    musicLobby.setNumberOfLoops(-1);
 
     musicLobby.play((success) => {
       if (success) {
         console.log('successfully finished playing');
         musicLobby.release()
-        musicLobby.stop()
       } else {
         console.log('playback failed due to audio decoding errors');
       }
