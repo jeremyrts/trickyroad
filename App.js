@@ -10,6 +10,7 @@ import ModeSelector from './components/ModeSelector'
 import GyroscopeMode from './components/GyroscopeMode'
 import TouchMode from './components/TouchMode'
 import ResultScreen from './components/ResultScreen'
+import PlayerInfos from './components/PlayerInfos'
 
 class HomeScreen extends React.Component {
   render() {
@@ -42,7 +43,8 @@ const AppNavigator = createStackNavigator({
     GyroscopeMode: { screen: GyroscopeMode },
     TouchMode: { screen: TouchMode },
     Ladder: { screen: Ladder },
-    ResultScreen: { screen: ResultScreen }
+    ResultScreen: { screen: ResultScreen },
+    PlayerInfos: { screen: PlayerInfos}
   },
   {
     initialRouteName: 'Home',

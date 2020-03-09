@@ -14,12 +14,9 @@ export default class GyroscopeMode extends Component {
   state = {
     gyroscopeData: {},
     delta: { x: 0, y: 0, z: 0},
-    modalVisible: false,
+    readyToPlay: false,
+    startGame: false
   };
-
-  setModalVisible(visible) {
-    this.setState({modalVisible: visible});
-  }
 
   componentDidMount() {
     this._toggle()
@@ -27,6 +24,12 @@ export default class GyroscopeMode extends Component {
 
   componentWillUnmount() {
     this._unsubscribe();
+  }
+
+  setReadyToPlay(bool) {
+    this.setState({
+      readyToPlay: bool
+    })
   }
 
   _toggle = () => {
@@ -80,8 +83,37 @@ export default class GyroscopeMode extends Component {
     /*<SensorBluetooth style={gyro.ble} value={{left: this.state.gyroscopeData.x, top: this.state.gyroscopeData.y}} />*/
     return (
       <SafeAreaView style={gyro.container}>
+        <BluetoothManager 
+          onRef={ref => (this.parentReference = ref)}
+          parentReference = {this.setReadyToPlay.bind(this)}
+          position = {x2 + "," + y2}
+        />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={!this.state.startGame}
+        >
+          <View style={gyro.modalContainer}>
+            <View style={gyro.modal}>
+              <View>
+                <Text style= {[{ fontSize: 18, fontWeight: 'bold', color: 'white'}, (this.state.readyToPlay) && { display: 'none'}]}>Connecting...</Text>
+              </View>
+              <TouchableOpacity onPress={() => {
+                this.launchGame()
+                this.setState({
+                  startGame: true
+                })
+              }
+              } disabled={!this.state.readyToPlay}>
+                <View style = {[gyro.buttonContainer, (!this.state.readyToPlay) && {opacity: 0.2}]}>
+                  <Text style = {gyro.buttonTitle}>Start game</Text>
+                </View>
+              </TouchableOpacity>
+    
+            </View>
+          </View>
+        </Modal>
         <ImageBackground source={require('../assets/background.jpg')} style={gyro.background}>
-          <BluetoothManager />
           
           <View style={gyro.infos}>
             <View style={gyro.timer}>
@@ -105,28 +137,7 @@ export default class GyroscopeMode extends Component {
           <View style={gyro.leaveContainer}>
             {/* !this.state.modalVisible && <LeaveButton></LeaveButton>*/}
           </View>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={this.state.modalVisible}
-            onRequestClose={() => {
-              this.launchGame()
-            }}
-          >
-            
-            <View style={gyro.modalContainer}>
-              <View style={gyro.modal}>
-              <Text style= {{ fontSize: 18, fontWeight: 'bold', color: 'white'}}>
-                  Are you ready ?
-                </Text>
-                <TouchableOpacity onPress={() => {this.setModalVisible(!this.state.modalVisible);  this.launchGame()}}>
-                  <View style = {gyro.buttonContainer}>
-                    <Text style = {gyro.buttonTitle}>Yes</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
+          
           <View style={gyro.debug}>
            {/* <Text style= {{ fontSize: 20, color: 'white'}}>
               Gyro :

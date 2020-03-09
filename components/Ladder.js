@@ -1,13 +1,18 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, SafeAreaView, ImageBackground, TouchableOpacity, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, ImageBackground, TouchableOpacity, AsyncStorage, TextInput, Dimensions } from 'react-native';
 import { Cache } from "react-native-cache"
 import base from '../base'
+import { withNavigation } from 'react-navigation'
+import { stringLiteral } from '@babel/types';
 
-export default class Ladder extends Component {
+class Ladder extends Component {
 	state = {
 		bestScores: [],
 		cache: null, 
-		user: null
+		user: null,
+		allBestScores: [],
+		displaySize: 8,
+		searchResult: []
 	}
 
 	componentDidMount () {
@@ -30,8 +35,8 @@ export default class Ladder extends Component {
 			context: this,
 			asArray: true,
 			then(data){
-				const displaySize = 8
 				let scores = data.sort((a,b) => a.bestScore.value > b.bestScore.value)
+				let scoresCpy = [...scores]
 
 				let myScorePos = null
 				for(let i = 0; i < scores.length; i++) {
@@ -40,31 +45,72 @@ export default class Ladder extends Component {
 						break
 					}
 				}
-
-				if(scores.length > displaySize) {
-					if(myScorePos < displaySize) {
-						scores = scores.slice(0, displaySize)
-					} else {
-						const myScore = scores[myScorePos]
-						scores = [...scores.slice(0,displaySize-1), myScore]
-						myScorePos = displaySize-1
-					}
-				}
-
-				this.setState({...this.state, bestScores: scores.reduce((acc, score, index) => {
-					let styles = [ladder.item]
-					
-					if(index === myScorePos){
-						styles.push(ladder.myScore)
-					}
-					let date = new Date(0)
-					date.setSeconds(parseInt(score.bestScore.value)) // specify value for SECONDS here
-					let timeString = date.toISOString().substr(14, 5)
-
-					return [...acc, <View><Text style={styles}>{score.bestScore.user}</Text><Text style={[...styles,ladder.time]}>{timeString}</Text></View>]
-				}, [])}) 
+				this.setState({
+					...this.state,
+					allBestScores: scoresCpy
+				})
+				this.setState({
+					...this.state, 
+					bestScores: this.parseScores(scores, myScorePos),
+				}) 
 			}	
 		});
+	}
+
+	parseScores(scores, myScorePos) {
+		const self = this
+		if(scores.length > this.state.displaySize) {
+			if(myScorePos < this.state.displaySize) {
+				scores = scores.slice(0, this.state.displaySize)
+			} else {
+				const myScore = scores[myScorePos]
+				scores = [...scores.slice(0,this.state.displaySize-1), myScore]
+				myScorePos = this.state.displaySize-1
+			}
+		}
+		return scores.reduce((acc, score, index) => {
+			let styles = [ladder.item]
+			
+			if(index === myScorePos){
+				styles.push(ladder.myScore)
+			}
+			let date = new Date(0)
+			date.setSeconds(parseInt(score.bestScore.value)) // specify value for SECONDS here
+			let timeString = date.toISOString().substr(14, 5)
+			return [...acc, <View>
+				<TouchableOpacity onPress={() => {
+					this.props.navigation.navigate('PlayerInfos', {
+						player: score.bestScore.user
+					})
+				}}>
+				<Text style={styles}>{self.state.allBestScores.indexOf(score) + 1 } - {score.bestScore.user}</Text><Text style={[...styles,ladder.time]}>{timeString}</Text>
+			</TouchableOpacity>
+				
+			</View>]
+		}, [])
+	}
+
+	searchPlayer(text) {
+		console.log(this.state.allBestScores)
+		console.log('+++++++++++++++++++++')
+		const resArr = this.state.allBestScores.filter((score) => {
+			return score.bestScore.user.toUpperCase().includes(text.toUpperCase())
+		})
+		console.log(this.state.allBestScores)
+
+		let myScorePos = null
+		for(let i = 0; i < resArr.length; i++) {
+			if(resArr[i].bestScore.user === this.state.user) {
+				myScorePos = i
+				break
+			}
+		}
+
+		this.setState({
+			...this.state,
+			bestScores: this.parseScores(resArr, myScorePos)
+		})
+		
 	}
 
 	render() {
@@ -82,8 +128,17 @@ export default class Ladder extends Component {
 							<View style={ladder.title}>
 								<Text style={ladder.titleValue}>Leaderboard</Text>
 							</View>
+							<View>
+								<TextInput 
+									style={ladder.search} 
+									onChangeText={text => this.searchPlayer(text)} 
+									placeholder='Search a player...'
+									//value='{this.state.search}' 
+									// clearButtonMode="unless-editing" 
+									// ref={input => { this.textInput = input }} 
+								/>
+							</View>
 							<View style={ladder.infosValue}>
-								{/* Module à part pour récupérer les couples pseudo/scores */}
 								{this.state.bestScores}
 							</View>
 						</View>
@@ -153,6 +208,19 @@ const ladder = StyleSheet.create({
 	},
 	myScore: {
 		color: '#FFF737'
+	},
+	search: {
+		position: 'relative',
+		padding: 10,
+		width: '80%',
+		borderRadius: 30, 
+		backgroundColor: '#623231',
+		color: 'white',
+		textAlign: 'center',
+		marginBottom: 30,
+		width: Dimensions.get('window').width * 0.8
 	}
 
 })
+
+export default withNavigation(Ladder)

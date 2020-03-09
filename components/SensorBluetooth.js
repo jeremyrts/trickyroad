@@ -219,7 +219,6 @@ class SensorBluetooth extends Component {
 	}
 
 	render() {
-		console.log("ETAT CONNEXION : ", this.state.connected)
 		this.sendMessage(Math.round(this.props.value.left)+','+Math.round(this.props.value.top))
 		// if(this.state.connected === false) {
 		// 	return (

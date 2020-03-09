@@ -8,7 +8,7 @@ import { withNavigation } from 'react-navigation'
 
 class BluetoothManager extends Component {
     constructor() {
-        super()
+		super()
         this.manager = new BleManager()
 		this.state = {
 			log: 'Start state',
@@ -40,13 +40,14 @@ class BluetoothManager extends Component {
 
     componentDidMount() {
 		const subscription = this.manager.onStateChange(state => {
-			this.log(state)
 			if (state === 'PoweredOn') {
 				this.setState({ canSearch: true })
 				this.search()
 				subscription.remove()
 			}
 		}, true)
+
+		this.search()
 	}
 
 	scanAndConnect() {
@@ -56,8 +57,10 @@ class BluetoothManager extends Component {
 				this.log(error)
 				return
 			}
-			if (device.name) {
+			if (device.name === "TrickyRoad") {
 				this.addDevice(device)
+				this.stopSearch()
+				this.connectToDevice(device)
 			}
 		})
 	}
@@ -98,6 +101,8 @@ class BluetoothManager extends Component {
 		_device.connect()
 			.then(device => {
 				this.log(`connected to: ${_device.name}`)
+				console.log('prêt à set ready')
+				this.props.parentReference(true)
 				return device.discoverAllServicesAndCharacteristics()
 			})
 			.then(async device => {
@@ -127,11 +132,15 @@ class BluetoothManager extends Component {
 									const characteristics = state.characteristics || {}
 									const bytes = base64.toByteArray(char.value)
 									const value = state.characteristicsMap[characteristic.uuid.toUpperCase()].byteConverter(bytes)
-
+									//required value: w1500 || l1500
+									
+									const result = this.parseResult(value)
+									
                                     characteristics[characteristic.uuid] = { bytes, value }
                                     
                                     this.props.navigation.navigate('ResultScreen', {
-										score: value
+										score: result.value,
+										won: result.won
 									})
 									return { characteristics }
 								}, () => console.log(this.state))
@@ -174,9 +183,19 @@ class BluetoothManager extends Component {
 		}
 	}
 
+	parseResult(result) {
+		return {
+			value: result.slice(1, result.length),
+			won: result[0] === 'w' ? true : false
+		}
+	}
+
 	render() {
+		this.sendMessage(this.props.position)
 		return (
-			<View style={styles.container}>
+			<View style={styles.container}></View> 
+		);
+			/*<View style={styles.container}>
 				<View style={styles.log}>
 					<Text>{this.state.log}</Text>
 				</View>
@@ -235,7 +254,7 @@ class BluetoothManager extends Component {
 					/>
 				</View>
 			</View>
-		);
+		);*/
 	}
 }
 
