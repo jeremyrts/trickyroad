@@ -8,13 +8,11 @@ import { withNavigation } from 'react-navigation';
 class ResultScreen extends Component {
 	state = { 
 		user:null,
-		score: null,
+		score: this.props.navigation.state.params.score ? this.props.navigation.state.params.score : 1500 ,
 		cache: null
 	}
 
-	componentDidMount () {
-		
-		this.state.score = this.props.navigation.state.params.score ? this.props.navigation.state.params.score : 1500 
+	componentDidMount () { 
 		this.state.cache = new Cache({
 			namespace: "myapp",
 			policy: {
@@ -57,7 +55,8 @@ class ResultScreen extends Component {
 						date: new Date().toString(),
 						value: present[0].bestScore > score ? present[0].bestScore : score,
 						user: pseudo
-					}
+					},
+					lastGame: new Date().toString()
 				},
 				then(err){
 					if(!err){
@@ -94,7 +93,8 @@ class ResultScreen extends Component {
 								date: new Date().toString(),
 								value: score,
 								user: pseudo
-								}
+							},
+							lastGame: new Date().toString()
 						},
 						then(err){
 							if(!err){
@@ -115,6 +115,13 @@ class ResultScreen extends Component {
 		}
 		this.textInput.clear()
 	}
+
+	parseScore() {
+		let date = new Date(0)
+		date.setSeconds(parseInt(this.state.score)) // specify value for SECONDS here
+		return date.toISOString().substr(14, 5)
+	}
+
 	render() {
 		const connectionForm = <View>
 			<Text style={resultScreen.saveModuleTitle}> Connect you to save your score </Text>
@@ -133,7 +140,7 @@ class ResultScreen extends Component {
 			} else {
 				inscriptionForm = connectionForm
 			}
-		if(!this.props.won) {
+		if(this.props.navigation.state.params.won) {
 			return (
 				<SafeAreaView style={resultScreen.container}>
 					<ImageBackground source={require('../assets/background.jpg')} style={resultScreen.background}>
@@ -142,7 +149,8 @@ class ResultScreen extends Component {
 								<View style={resultScreen.title}>
 									<Text style={resultScreen.titleValue}>Congratulations</Text>
 									{/* Insérer le score obtenu */}
-									<Text style={resultScreen.subtitleValue}>{this.props.navigation.state.params.score}</Text>
+
+									<Text style={resultScreen.subtitleValue}>{this.parseScore()}</Text>
 								</View>
 								<View style={resultScreen.saveModule}>
 									{inscriptionForm}
@@ -170,7 +178,7 @@ class ResultScreen extends Component {
 								<View style={resultScreen.title}>
 									<Text style={resultScreen.titleValue}>So close...</Text>
 									{/* Insérer le score obtenu */}
-									<Text style={resultScreen.subtitleValue}>{this.props.navigation.state.params.score}</Text>
+									<Text style={resultScreen.subtitleValue}>{this.parseScore()}</Text>
 								</View>
 								<View style={resultScreen.leaderboard}>
 									<View style={resultScreen.leaderboardTitle}>
