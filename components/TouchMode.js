@@ -4,10 +4,14 @@ import LeaveButton from './LeaveButton'
 import firebase from 'firebase'
 import { Cache } from "react-native-cache"
 
+
 import base from '../base'
 
 import SensorBluetooth from './SensorBluetooth';
 import BluetoothManager from './BluetoothManager'
+
+
+
 
 export default class TouchMode extends Component {
   
@@ -19,7 +23,7 @@ export default class TouchMode extends Component {
   }
   
 
-  componentDidMount () {
+  componentDidMount (route) {
     this.state.cache = new Cache({
       namespace: "myapp",
       policy: {
@@ -32,11 +36,42 @@ export default class TouchMode extends Component {
       console.log("Get from previous cache " + value);
     });
 
+    
+
+    const { navigation } = this.props;
+    var Sound = require('react-native-sound');
+    var musicLobby = new Sound(require('../assets/Sky_Scraper.mp3'),
+    (error, sound) => {
+    if (error) {
+      alert('error' + error.message);
+      return;
+    }
+    console.log("INFO "+navigation.state.params)
+    if(this.props.navigation.state.params === "false"){
+      musicLobby.setVolume(0)
+    }
+    musicLobby.play()
+    
+
+    
+    this.blurListener = navigation.addListener('didBlur', () => {
+      // The screen is focused
+      // Call any action
+      musicLobby.stop()
+    });
+    // Loop indefinitely until stop() is called
+    musicLobby.setNumberOfLoops(-1);
+    })
+  }
     // base.syncState('/', {
     //   context: this,
     //   state: 'messages'
     // })
     //console.log(this.state.messages)
+    
+  componentWillUnmount() {
+    // Remove the event listener
+    this.blurListener.remove()
   }
 
   addPseudoToCache() {
@@ -171,8 +206,10 @@ export default class TouchMode extends Component {
     return (
       <SafeAreaView style={touch.container}>
         <ImageBackground source={require('../assets/background.jpg')} style={touch.background}>
-          <BluetoothManager />
-          
+          {/* <BluetoothManager /> */}
+          <TouchableOpacity onPress={() => this.props.navigation.navigate("Home")}>
+            <Text>{this.props.navigation.state.params}</Text>
+          </TouchableOpacity>
         </ImageBackground>
       </SafeAreaView>
     );

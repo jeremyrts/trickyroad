@@ -1,5 +1,12 @@
 import React, { Component } from 'react';
-import { StyleSheet, TouchableOpacity, Image, SafeAreaView, ImageBackground } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, Image, SafeAreaView, ImageBackground } from 'react-native';
+import { StackActions, NavigationActions, route } from 'react-navigation';
+
+
+const resetGyroscopeMode = StackActions.reset({
+  index: 0,
+  actions: [NavigationActions.navigate({ routeName: 'GyroscopeMode' })],
+});
 
 export default class ModeSelector extends Component {
 
@@ -7,13 +14,21 @@ export default class ModeSelector extends Component {
     return (
       <SafeAreaView style={selector.container}>
         <ImageBackground source={require('../assets/background.jpg')} style={selector.background}>
-          <TouchableOpacity style={selector.containerTouch} onPress={() => this.props.navigation.navigate('TouchMode') }>
+          <TouchableOpacity style={selector.containerTouch} onPress={() => {
+            const resetTouchMode = StackActions.reset({
+              index: 0,
+              actions: [NavigationActions.navigate(
+                { routeName: 'TouchMode', params: this.props.navigation.state.params.isSoundOn,})],
+            });
+            this.props.navigation.dispatch(resetTouchMode) 
+          }
+            }>
             <Image resizeMode={'contain'}
               style={selector.img}
               source={require('../assets/icons/touchscreen.png')}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={selector.containerGyroscope}  onPress={() => this.props.navigation.navigate('GyroscopeMode') }>
+          <TouchableOpacity style={selector.containerGyroscope}  onPress={() => this.props.navigation.dispatch(resetGyroscopeMode) }>
             <Image resizeMode={'contain'}
               style={selector.img}
               source={require('../assets/icons/gyroscope.png')}

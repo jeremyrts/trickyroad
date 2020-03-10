@@ -7,9 +7,12 @@ export default class MainButton extends Component {
 
   render() {
     return (
-      <TouchableOpacity onPress={() => this.props.navigation.navigate(this.props.destination)}>
+      <TouchableOpacity 
+        onPress={() => {
+          this.props.navigation.navigate(this.props.destination, {isSoundOn: this.props.isSoundOn}) 
+      }}>
         <View style = {Button.container}>
-          <Text style = {Button.title}>{this.props.title}</Text>
+    <Text style = {Button.title}>{this.props.title}</Text>
         </View>
       </TouchableOpacity>
     );
